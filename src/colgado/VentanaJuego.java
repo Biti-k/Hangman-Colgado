@@ -32,6 +32,7 @@ public class VentanaJuego extends JFrame implements ActionListener{
     String palabrasMedio[] = {"estupendo", "maravilloso", "relampago", "urinario", "esternon", "maquina", "arepa", "burrito", "manzana", "kilogramo", "holograma"};
     String palabrasDificiles[] = {"esternocleidomastoideo", "otorrinolaringólogo", "supercalifragilisticoexpialidoso", "desoxirribonucleico", "paralelepípedo", "Hipopotomonstrosesquipedaliofobia", "pneumonoultramicroscopicsilicovolcanoconiosis", "electroencefalografista"};
     ArrayList<String> letrasRegistradas;
+    ArrayList<String> letrasCache;
     int indexImagen;
     public VentanaJuego(){
         letrasRegistradas = new ArrayList<>();
@@ -120,61 +121,70 @@ public class VentanaJuego extends JFrame implements ActionListener{
         if(e.getSource() == iniciarPartida){
             palabraRandom();
         }
-        
+        String letrasIntroducidas = fieldLetras.getText();
+        letrasIntroducidas = letrasIntroducidas.toLowerCase();
         if(e.getSource() == fieldLetras){
-            String letrasIntroducidas = fieldLetras.getText();
-            letrasIntroducidas = letrasIntroducidas.toLowerCase();
+
             char letraIntroducida = letrasIntroducidas.charAt(0);
-            if(letrasIntroducidas.length() <= 1){
+
                 if(palabraEscogida.matches(".*" + letrasIntroducidas + "+.*|" + letrasIntroducidas + "+.*|.*" + letrasIntroducidas + "+")){
                     String pAux = palabraLabel.getText();
-                    for(int i = 0; i < palabraEscogida.length(); i++){
-                        if(palabraEscogida.charAt(i) == letraIntroducida){
-                            pAux = pAux.substring(0, i) + letraIntroducida + pAux.substring(i + 1, pAux.length());
+                    for(int j = 0; j < letrasIntroducidas.length(); j++){
+                         for(int i = 0; i < palabraEscogida.length(); i++){
+                            if(palabraEscogida.charAt(i) == letrasIntroducidas.charAt(j)){
+                                System.out.println("Mismo caracter");
+                                pAux = pAux.substring(0, i) + letrasIntroducidas.charAt(j) + pAux.substring(i + 1, pAux.length());
+                                if(letrasRegistradas.indexOf(String.valueOf(letrasIntroducidas.charAt(j))) == -1){
+                                    System.out.println("Mismo caracter no estaba registrado, boton verde");
+                                    letrasRegistradas.add(String.valueOf(letrasIntroducidas.charAt(j)));
+                                    JButton b = new JButton(letrasIntroducidas);
+                                    b.setBackground(Color.white);
+                                    b.setBorder(BorderFactory.createLineBorder(Color.black));
+                                    b.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
+                                    b.setForeground(Color.GREEN);
+                                    letrasIntroducidasPanel.add(b);
+                                }
+                                letrasRegistradas.add(String.valueOf(letrasIntroducidas.charAt(j)));
+                            }
                         }
                     }
                     palabraLabel.setText(pAux);
-                    if(palabraLabel.getText().equals(palabraEscogida)){
-                        JOptionPane.showMessageDialog(null, "Has ganado!");
-                        palabraRandom();
-                    }
-                    if(letrasRegistradas.indexOf(String.valueOf(letraIntroducida)) == -1){
-                         letrasRegistradas.add(String.valueOf(letraIntroducida));
-                           JButton b = new JButton(letrasIntroducidas);
-                           b.setBackground(Color.white);
-                           b.setBorder(BorderFactory.createLineBorder(Color.black));
-                           b.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
-                           b.setForeground(Color.GREEN);
-                           letrasIntroducidasPanel.add(b);
-                    }
                 }else{
-                    if(letrasRegistradas.indexOf(String.valueOf(letraIntroducida)) == -1){
-                        JButton b = new JButton(letrasIntroducidas);
-                        b.setBackground(Color.white);
-                        b.setBorder(BorderFactory.createLineBorder(Color.black));
-                        b.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
-                        b.setForeground(Color.RED);
-                        letrasIntroducidasPanel.add(b);
-                        letrasRegistradas.add(String.valueOf(letraIntroducida));
-                    }
-                    indexImagen++;
-                    if(indexImagen == 9){
-                        monigoteLabel.setIcon(imagenes.get(indexImagen));
-                        JOptionPane.showMessageDialog(null, "Has perdido, la palabra era: " + palabraEscogida);
-                        indexImagen = 0;
-                        monigoteLabel.setIcon(imagenes.get(indexImagen));
-                        palabraRandom();
-                    }else if(indexImagen < 9){
-                        monigoteLabel.setIcon(imagenes.get(indexImagen));
-                    }else{
-                        JOptionPane.showMessageDialog(null, "Escoge una dificultad y reinicia la partida :)");
-                    }
+                        System.out.println("letra/letras incorrectas");
+                        for(int j = 0; j < palabraEscogida.length(); j++){
+                                for(int i = 0; i < fieldLetras.getText().length(); i++){
+                                    if(palabraEscogida.charAt(j) != fieldLetras.getText().charAt(i)){
+                                        indexImagen++;
+                                        if(letrasRegistradas.indexOf(String.valueOf(fieldLetras.getText().charAt(j))) == -1){
+                                            System.out.println("Diferente caracter no estaba registrado, boton rojo");
+                                            letrasRegistradas.add(String.valueOf(fieldLetras.getText().charAt(j)));
+                                            JButton b = new JButton(String.valueOf(fieldLetras.getText().charAt(j)));
+                                            b.setBackground(Color.white);
+                                            b.setBorder(BorderFactory.createLineBorder(Color.black));
+                                            b.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
+                                            b.setForeground(Color.RED);
+                                            letrasIntroducidasPanel.add(b);   
+                                        }
+                                    }
+                            }
+                        }
                 }
                 fieldLetras.setText("");
-            }else{
-                JOptionPane.showMessageDialog(null, "Función no soportada aún, por favor escriba letra a letra.");
-                fieldLetras.setText("");
-            }
+                if(palabraLabel.getText().equals(palabraEscogida)){
+                    JOptionPane.showMessageDialog(null, "Has ganado!");
+                    palabraRandom();
+                }
+
+                if(indexImagen == 9){
+                    monigoteLabel.setIcon(imagenes.get(indexImagen));
+                    JOptionPane.showMessageDialog(null, "Has perdido, la palabra era: " + palabraEscogida);
+                    indexImagen = 0;
+                    monigoteLabel.setIcon(imagenes.get(indexImagen));
+                    palabraRandom();
+                }else if(indexImagen < 9){
+                    monigoteLabel.setIcon(imagenes.get(indexImagen));
+                }
+                
             letrasIntroducidasPanel.validate();
             letrasIntroducidasPanel.repaint();
         }
